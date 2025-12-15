@@ -1,0 +1,39 @@
+---
+metadata:
+  name: billing-entity-service
+  owner: finance-team
+spec:
+  deployment_config:
+    cluster_targets:
+      - dev-sdc01
+      - test-sdc01
+      - prod-sdc01
+      - prod-eus01
+    resources:
+      default:
+        request:
+          memory: 128Mi
+        limit:
+          memory: 256Mi
+      prod-base:
+        limit:
+          memory: 512Mi
+    replicas:
+      default:
+        min: 1
+        max: 2
+      prod:
+        max: 6
+  database:
+    billing-db:
+      default:
+        storage:
+          class: standard
+          size: 5Gi
+  service_dependencies:
+    - name: payments-gateway
+      permissions:
+        - Payments.Process
+    - name: customer-service
+      permissions:
+        - Customer.Read

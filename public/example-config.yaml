@@ -1,0 +1,90 @@
+---
+metadata:
+  name: consumption-metric-processor
+  owner: waterknights
+spec:
+  deployment_config:
+    cluster_targets:
+      - dev-sdc01
+      - test-sdc01
+      - prod-sdc01
+      - prod-eus01
+    resources:
+      default:
+        request:
+          memory: 100Mi
+        limit:
+          memory: 200Mi
+      prod-base:
+        limit:
+          memory: 500Mi
+      prod-eus01:
+        limit:
+          memory: 100Mi
+    replicas:
+      default:
+        min: 1
+        max: 3
+      prod:
+        max: 10
+    egress:
+      default:
+        - fa-pdfrenderer.azurewebsites.net
+      dev-sdc01:
+        - fa-dev-pdfrenderer.azurewebsites.net
+      test-sdc01:
+        - fa-test-pdfrenderer.azurewebsites.net
+      prod-sdc01:
+        - fa-sdc01-pdfrenderer.azurewebsites.net
+      prod-eus01:
+        - fa-eus01-pdfrenderer.azurewebsites.net
+  message_queue:
+    topic_definitions:
+      cleaning-and-normalization-consumption-metrics-daily:
+        config:
+          default:
+            partitions: 1
+            replicas: 1
+            retention_days: 14
+          prod_base:
+            partitions: 4
+            replicas: 3
+          prod-sdc01:
+            partitions: 8
+        permissions_granted_to:
+          - identity: flow
+            permission: read
+      permissions_requested_from:
+        ready-adaption.readings: read
+  search_index:
+    consumption-metrics-daily:
+      default:
+        shards: 1
+        replicas: 0
+        refresh_interval: 10s
+      prod-base:
+        shards: 3
+        replicas: 2
+        refresh_interval: 1s
+      prod-sdc01:
+        shards: 5
+  database:
+    consumption-metrics:
+      default:
+        storage:
+          class: default
+          size: 100Mi
+      prod:
+        storage:
+          class: premium
+          size: 1Ti
+        default: default
+        prod: premium...
+  service_dependencies:
+    - name: billing-entity-service
+      permissions:
+        - System.Access
+    - name: device-description
+      permissions:
+        - System.Access
+        - meterhistory.read

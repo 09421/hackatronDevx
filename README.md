@@ -1,36 +1,155 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# YAML Configuration Visualizer
+
+A modern web application built with Next.js, React, and TypeScript to visualize Kubernetes and service configurations from YAML files. Upload YAML files directly or fetch them from GitLab repositories to see detailed visualizations of your K8s setup, resource limits, and service dependencies.
+
+## Features
+
+✨ **YAML File Upload** - Upload YAML configuration files directly from your machine
+📦 **GitLab Integration** - Fetch YAML files directly from GitLab repositories
+🎨 **Beautiful Visualizations** - Color-coded cards for memory, CPU, replicas, and dependencies
+🗄️ **Dependency Tracking** - Visual indicators for database, Kafka, and Redis usage
+📊 **Configuration Summary** - Overview statistics of all services
+🔍 **Raw JSON View** - View the complete parsed configuration in JSON format
+
+## Project Structure
+
+```
+src/
+├── app/
+│   ├── page.tsx           # Main page with state management
+│   ├── layout.tsx         # App layout
+│   └── globals.css        # Global styles
+├── components/
+│   ├── YamlUploader.tsx           # File upload & GitLab integration
+│   ├── K8sConfigVisualizer.tsx    # K8s resource visualization
+│   └── ServiceDependencies.tsx    # Service dependency display
+├── lib/
+│   └── yamlParser.ts      # YAML parsing utilities
+└── public/
+    └── example-config.yaml # Example configuration file
+```
+
+## YAML File Format
+
+Your YAML files should follow this structure:
+
+```yaml
+services:
+  - name: api-gateway
+    version: "1.0.0"
+    k8s:
+      memory: "512Mi"
+      cpu: "500m"
+      replicas: 3
+    database: true
+    kafka: true
+    redis: false
+
+  - name: auth-service
+    version: "2.1.0"
+    k8s:
+      memory: "256Mi"
+      cpu: "250m"
+      replicas: 2
+    database: true
+    kafka: false
+    redis: true
+
+env:
+  LOG_LEVEL: "info"
+  ENVIRONMENT: "production"
+
+metadata:
+  cluster: "production"
+  region: "us-east-1"
+```
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+ 
+- npm or yarn
+
+### Installation
+
+```bash
+npm install
+```
+
+### Development
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Building for Production
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm start
+```
 
-## Learn More
+## Usage
 
-To learn more about Next.js, take a look at the following resources:
+### Upload a YAML File
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Click the **Upload File** tab on the main page
+2. Click the file area or drag and drop a YAML file
+3. The configuration will be parsed and visualized automatically
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Fetch from GitLab
 
-## Deploy on Vercel
+1. Click the **Load from GitLab** tab
+2. Enter the GitLab repository URL (e.g., `https://gitlab.com/group/project`)
+3. Provide the file path in the repository (e.g., `config.yaml`)
+4. (Optional) Add a GitLab personal token for private repositories
+5. Click **Load from GitLab**
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Example Configuration
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+A sample configuration file is included at `/public/example-config.yaml`. You can download it and test the uploader.
+
+## Technologies Used
+
+- **Next.js 16** - React framework with App Router
+- **React 19** - UI library
+- **TypeScript** - Type safety
+- **Tailwind CSS 4** - Styling
+- **js-yaml** - YAML parsing
+- **ESLint** - Code quality
+
+## API Routes
+
+Currently, this is a client-side application. YAML parsing happens entirely in the browser using `js-yaml`. GitLab file fetching uses the GitLab raw file API.
+
+## Key Components
+
+### YamlUploader
+Handles both local file uploads and GitLab repository integration with error handling.
+
+### K8sConfigVisualizer
+Displays Kubernetes configuration details including memory, CPU limits, and replica counts with color-coded cards.
+
+### ServiceDependencies
+Shows which external services (Database, Kafka, Redis) each service uses with visual indicators.
+
+## Future Enhancements
+
+- Support for multiple file upload
+- YAML validation against schemas
+- Export configuration as JSON
+- Comparison view for multiple configurations
+- Real-time editing capabilities
+- Integration with Kubernetes API for live cluster monitoring
+
+## License
+
+MIT
+
+## Support
+
+For issues or suggestions, please open an issue on the project repository.
+
