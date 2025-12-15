@@ -1,0 +1,12 @@
+{
+  "consumption-metric-processor": {
+    "DATABASE_HOST": "db.dev.internal",
+    "LOG_LEVEL": "debug",
+    "RETRY_COUNT": "1"
+  },
+
+  "device-description": {
+    "SEARCH_URL": "https://search.dev.internal",
+    "REDIS_HOST": "redis.dev.internal"
+  }
+}

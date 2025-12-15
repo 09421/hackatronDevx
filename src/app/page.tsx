@@ -4,13 +4,11 @@ import { useState, useEffect } from 'react';
 import YamlUploader from '@/components/YamlUploader';
 import ServicesTab from '@/components/ServicesTab';
 import EnvironmentTab from '@/components/EnvironmentTab';
-import MetadataTab from '@/components/MetadataTab';
 import SpecTab from '@/components/SpecTab';
-import StatusTab from '@/components/StatusTab';
 import LandingPage from '@/components/LandingPage';
 import { ParsedYaml, parseYamlContent } from '@/lib/yamlParser';
 
-type TabType = 'services' | 'environment' | 'metadata' | 'spec' | 'status';
+type TabType = 'services' | 'environment' | 'spec';
 
 interface TabConfig {
   id: TabType;
@@ -21,16 +19,13 @@ interface TabConfig {
 const TABS: TabConfig[] = [
   { id: 'spec', label: 'Specification', icon: '🔧' },
   { id: 'services', label: 'Services', icon: '🚀' },
-  { id: 'status', label: 'Status', icon: '📊' },
   { id: 'environment', label: 'Environment', icon: '⚙️' },
-  { id: 'metadata', label: 'Metadata', icon: '📋' },
 ];
 
 export default function Home() {
   const [yamlData, setYamlData] = useState<ParsedYaml | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('services');
-  const [isDarkMode, setIsDarkMode] = useState(true);
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [selectedServiceYaml, setSelectedServiceYaml] = useState<ParsedYaml | null>(null);
   const [isLoadingSelectedService, setIsLoadingSelectedService] = useState(false);
@@ -48,8 +43,6 @@ export default function Home() {
         setActiveTab('spec');
       } else if (data.services && data.services.length > 0) {
         setActiveTab('services');
-      } else if (data.metadata && Object.keys(data.metadata).length > 0) {
-        setActiveTab('metadata');
       } else {
         setActiveTab('environment');
       }
@@ -130,6 +123,7 @@ export default function Home() {
 
   // Use selected service YAML when available, otherwise fall back to the main uploaded YAML
   const detailYaml = selectedServiceYaml || yamlData;
+  const pageOwner = detailYaml?.metadata?.owner || detailYaml?.metadata?.OWNER || detailYaml?.metadata?.Owner || null;
 
   const hasTab = (tabId: TabType): boolean => {
     if (!yamlData) return false;
@@ -138,12 +132,8 @@ export default function Home() {
         return !!(yamlData.services && yamlData.services.length > 0);
       case 'environment':
         return !!(yamlData.env && Object.keys(yamlData.env).length > 0);
-      case 'metadata':
-        return !!(yamlData.metadata && Object.keys(yamlData.metadata).length > 0);
       case 'spec':
         return !!(yamlData.spec && Object.keys(yamlData.spec).length > 0);
-      case 'status':
-        return !!(yamlData.metadata && Object.keys(yamlData.metadata).length > 0);
       default:
         return false;
     }
@@ -156,55 +146,35 @@ export default function Home() {
         return yamlData.services?.length || 0;
       case 'environment':
         return Object.keys(yamlData.env || {}).length;
-      case 'metadata':
-        return Object.keys(yamlData.metadata || {}).length;
       case 'spec':
         return Object.keys(yamlData.spec || {}).length;
-      case 'status':
-        return 0;
       default:
         return 0;
     }
   };
 
   return (
-    <div className={`min-h-screen transition-colors ${isDarkMode ? 'bg-gradient-to-br from-gray-900 to-gray-800' : 'bg-gradient-to-br from-gray-50 to-gray-100'} py-8 px-4`}>
+    <div className="min-h-screen transition-colors bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4">
       <div className="max-w-7xl mx-auto">
-        {/* Header with Dark Mode Toggle */}
+        {/* Header */}
         <div className="mb-8 flex items-start justify-between">
           <div>
             {selectedService && (
               <button
                 onClick={() => setSelectedService(null)}
-                className={`text-sm font-medium mb-2 transition-colors ${
-                  isDarkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'
-                }`}
+                className={`text-sm font-medium mb-2 transition-colors text-blue-600 hover:text-blue-700`}
               >
                 ← Back to Services
               </button>
             )}
-            <h1 className={`text-4xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            <h1 className="text-4xl font-bold mb-2 text-gray-900">
               {selectedService ? selectedService : 'Kamstage'}
             </h1>
-            <p className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>
-              {selectedService
-                ? 'View detailed configuration and status'
-                : ''}
-            </p>
+            <div className="flex items-center gap-3">
+              <p className="text-gray-600">{selectedService ? 'View detailed configuration and status' : ''}</p>
+            </div>
           </div>
           
-          {/* Dark Mode Toggle */}
-          <button
-            onClick={() => setIsDarkMode(!isDarkMode)}
-            className={`px-4 py-2 rounded-lg font-medium transition-all flex items-center gap-2 ${
-              isDarkMode
-                ? 'bg-gray-700 text-yellow-300 hover:bg-gray-600'
-                : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-            }`}
-          >
-            <span className="text-lg">{isDarkMode ? '☀️' : '🌙'}</span>
-            {isDarkMode ? 'Light' : 'Dark'}
-          </button>
         </div>
 
         {/* Loading example config by default (uploader hidden) */}
@@ -212,8 +182,8 @@ export default function Home() {
         {/* Content Area */}
         {!selectedService && yamlData && !isLoading && (
           <div className="space-y-6">
-            <div className={`rounded-lg border shadow-sm overflow-hidden ${isDarkMode ? 'bg-white' : 'bg-white'}`}>
-              <div className={`p-6 ${isDarkMode ? 'bg-white' : 'bg-gray-50'}`}>
+            <div className="rounded-lg border shadow-sm overflow-hidden bg-white">
+              <div className="p-6 bg-gray-50">
                 <LandingPage onServiceSelect={setSelectedService} />
               </div>
             </div>
@@ -222,28 +192,64 @@ export default function Home() {
 
         {selectedService && yamlData && !isLoading && (
           <div className="space-y-6">
-            <div className={`rounded-lg border shadow-sm overflow-hidden transition-colors ${isDarkMode ? 'bg-white border-gray-300' : 'bg-white border-gray-300'}`}>
-              <div className={`flex border-b flex-wrap ${isDarkMode ? 'border-gray-200' : 'border-gray-300'}`}>
-                {TABS.map((tab) => {
-                  const count = getTabCount(tab.id);
-                  const show = hasTab(tab.id);
-                  if (!show) return null;
-                  return (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`px-6 py-4 font-medium text-center transition-all whitespace-nowrap ${activeTab === tab.id ? 'bg-blue-600 text-white border-b-2 border-blue-600' : 'bg-gray-50 text-gray-700 hover:bg-gray-100'}`}
-                    >
-                      <span className="text-xl mr-2">{tab.icon}</span>
-                      {tab.label}
-                      {count > 0 && (
-                        <span className="ml-2 inline-block bg-gray-300 text-gray-800 text-xs font-semibold px-2 py-0.5 rounded-full">{count}</span>
-                      )}
-                    </button>
-                  );
-                })}
+            <div className="rounded-lg border shadow-sm overflow-hidden transition-colors bg-white border-gray-300">
+              <div className="flex items-center justify-between border-b border-gray-300">
+                <div className="flex flex-wrap">
+                  {TABS.map((tab) => {
+                    const count = getTabCount(tab.id);
+                    const show = hasTab(tab.id);
+                    if (!show) return null;
+                    return (
+                      <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id)}
+                        className={`px-6 py-4 font-medium text-center transition-all whitespace-nowrap ${activeTab === tab.id ? 'bg-blue-600 text-white border-b-2 border-blue-600' : 'bg-gray-50 text-gray-700 hover:bg-gray-100'}`}
+                      >
+                        <span className="text-xl mr-2">{tab.icon}</span>
+                        {tab.label}
+                        {count > 0 && (
+                          <span className="ml-2 inline-block bg-gray-300 text-gray-800 text-xs font-semibold px-2 py-0.5 rounded-full">{count}</span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="flex items-center gap-4 pr-6">
+                  {pageOwner && (
+                    <div className="text-sm font-medium px-3 py-1 rounded bg-gray-100 text-gray-800">
+                      👤 {pageOwner}
+                    </div>
+                  )}
+                  {(selectedService || detailYaml?.metadata?.name) && (
+                    <div className="flex items-center gap-3">
+                      <a
+                        href={`https://gitlab.example.com/${selectedService || detailYaml?.metadata?.name}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-sm text-blue-600 hover:opacity-80"
+                        onClick={(e) => e.stopPropagation()}
+                        aria-label="Open GitLab"
+                        title="Open GitLab"
+                      >
+                        <img src="/gitlab-logo-500-rgb.svg" alt="GitLab" className="w-18 h-18 hover:scale-110 transition-transform" />
+                      </a>
+                      <a
+                        href={`https://grafana.example.com/dashboard/${selectedService || detailYaml?.metadata?.name}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-sm text-blue-600 hover:opacity-80"
+                        onClick={(e) => e.stopPropagation()}
+                        aria-label="Open Grafana"
+                        title="Open Grafana"
+                      >
+                        <img src="/Grafana_logo.svg" alt="Grafana" className="w-10 h-10 hover:scale-110 transition-transform" />
+                      </a>
+                    </div>
+                  )}
+                </div>
               </div>
-              <div className={`p-6 ${isDarkMode ? 'bg-white' : 'bg-gray-50'}`}>
+              <div className="p-6 bg-gray-50">
                 {isLoadingSelectedService && (
                   <div className="text-center py-12">Loading selected service configuration…</div>
                 )}
@@ -252,7 +258,6 @@ export default function Home() {
                   <>
                     {activeTab === 'services' && detailYaml?.services && <ServicesTab services={detailYaml.services} metadata={detailYaml.metadata} spec={detailYaml.spec} />}
                     {activeTab === 'environment' && <EnvironmentTab env={detailYaml?.env} />}
-                    {activeTab === 'metadata' && <MetadataTab metadata={detailYaml?.metadata} />}
                     {activeTab === 'spec' && detailYaml?.spec && (
                       <SpecTab
                         spec={detailYaml.spec}
@@ -271,7 +276,7 @@ export default function Home() {
                         }}
                       />
                     )}
-                    {activeTab === 'status' && <StatusTab metadata={detailYaml?.metadata} spec={detailYaml?.spec} />}
+                    
                   </>
                 )}
               </div>

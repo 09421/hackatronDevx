@@ -6,6 +6,9 @@ interface MetadataTabProps {
 
 export const MetadataTab = ({ metadata = {} }: MetadataTabProps) => {
   const isEmpty = Object.keys(metadata).length === 0;
+  const owner = (metadata && (metadata.owner || metadata.OWNER || metadata.Owner)) || null;
+  // prepare entries excluding the 'name' key since header shows the name already
+  const entries = Object.entries(metadata).filter(([k]) => k !== 'name');
 
   const renderValue = (value: any): string => {
     if (typeof value === 'object') {
@@ -41,22 +44,22 @@ export const MetadataTab = ({ metadata = {} }: MetadataTabProps) => {
         </div>
       ) : (
         <div>
-          <div className="bg-gradient-to-r from-teal-600 to-teal-700 px-6 py-4">
-            <h3 className="text-xl font-bold text-white">
-              Metadata ({Object.keys(metadata).length} items)
-            </h3>
-          </div>
+            <div className="bg-gradient-to-r from-teal-600 to-teal-700 px-6 py-4 flex items-center justify-between">
+              <h3 className="text-xl font-bold text-white">Metadata ({entries.length} items)</h3>
+              {owner && (
+                <div className="text-sm text-teal-100 bg-teal-700/20 px-3 py-1 rounded font-medium">
+                  👤 {owner}
+                </div>
+              )}
+            </div>
           <div className="p-6">
             <div className="space-y-4">
-              {Object.entries(metadata).map(([key, value]) => {
+              {entries.map(([key, value]) => {
                 const type = getValueType(value);
                 const typeColor = getTypeColor(type);
 
                 return (
-                  <div
-                    key={key}
-                    className="border border-gray-200 rounded-lg overflow-hidden"
-                  >
+                  <div key={key} className="border border-gray-200 rounded-lg overflow-hidden">
                     <div className="flex items-center justify-between p-4 bg-gray-50 border-b border-gray-200">
                       <div className="flex items-center gap-3">
                         <span className="font-mono text-sm font-semibold text-gray-800">
@@ -84,15 +87,15 @@ export const MetadataTab = ({ metadata = {} }: MetadataTabProps) => {
               <p className="text-sm text-gray-600 mb-4 font-medium">Type Distribution</p>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
                 {[
-                  { type: 'string', color: 'bg-blue-50 border-blue-200' },
-                  { type: 'number', color: 'bg-green-50 border-green-200' },
-                  { type: 'boolean', color: 'bg-purple-50 border-purple-200' },
-                  { type: 'array', color: 'bg-orange-50 border-orange-200' },
-                  { type: 'object', color: 'bg-indigo-50 border-indigo-200' },
-                ].map(({ type, color }) => {
-                  const count = Object.values(metadata).filter(
-                    (v) => getValueType(v) === type
-                  ).length;
+                    { type: 'string', color: 'bg-blue-50 border-blue-200' },
+                    { type: 'number', color: 'bg-green-50 border-green-200' },
+                    { type: 'boolean', color: 'bg-purple-50 border-purple-200' },
+                    { type: 'array', color: 'bg-orange-50 border-orange-200' },
+                    { type: 'object', color: 'bg-indigo-50 border-indigo-200' },
+                  ].map(({ type, color }) => {
+                    const count = Object.values(Object.fromEntries(entries)).filter(
+                      (v) => getValueType(v) === type
+                    ).length;
                   return count > 0 ? (
                     <div
                       key={type}

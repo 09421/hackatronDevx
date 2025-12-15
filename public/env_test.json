@@ -1,0 +1,10 @@
+{
+  "consumption-metric-processor": {
+    "DATABASE_HOST": "db.test.internal",
+    "LOG_LEVEL": "info"
+  },
+
+  "device-description": {
+    "REDIS_HOST": "redis.test.internal"
+  }
+}

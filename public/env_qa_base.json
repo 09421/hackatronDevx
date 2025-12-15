@@ -1,0 +1,19 @@
+{
+  "consumption-metric-processor": {
+    "DATABASE_HOST": "db.qa.internal",
+    "CACHE_URL": "redis://cache.qa.internal:6379/0",
+    "API_ENDPOINT": "https://api.qa.internal",
+    "LOG_LEVEL": "debug"
+  },
+
+  "billing-entity-service": {
+    "DATABASE_HOST": "db.billing.qa.internal",
+    "LOG_LEVEL": "debug"
+  },
+
+  "device-description": {
+    "SEARCH_URL": "https://search.qa.internal",
+    "REDIS_HOST": "redis.qa.internal",
+    "REDIS_PORT": "6379"
+  }
+}

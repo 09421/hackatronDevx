@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+
 interface ServiceQuickView {
   name: string;
   owner?: string;
@@ -75,6 +77,28 @@ interface LandingPageProps {
 }
 
 export const LandingPage = ({ onServiceSelect }: LandingPageProps) => {
+  const [openNamespaces, setOpenNamespaces] = useState<Record<string, boolean>>({
+    Flow: true,
+    Billing: true,
+    Consumption: true,
+  });
+
+  const toggleNamespace = (ns: string) =>
+    setOpenNamespaces((s) => ({ ...s, [ns]: !s[ns] }));
+
+  // Define the namespaces and how to match services
+  const NAMESPACES: { key: string; label: string; matcher: (name: string) => boolean }[] = [
+    { key: 'flow', label: 'Flow', matcher: (n) => /flow/i.test(n) || /device-description/i.test(n) },
+    { key: 'billing', label: 'Billing', matcher: (n) => /billing/i.test(n) },
+    { key: 'consumption', label: 'Consumption', matcher: (n) => /consumption/i.test(n) },
+  ];
+
+  // group services by namespace
+  const grouped: Record<string, ServiceQuickView[]> = {};
+  NAMESPACES.forEach((ns) => {
+    grouped[ns.label] = MOCK_SERVICES.filter((s) => ns.matcher(s.name));
+  });
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -87,19 +111,7 @@ export const LandingPage = ({ onServiceSelect }: LandingPageProps) => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
           <p className="text-gray-600 text-sm font-medium mb-1">Total Services</p>
-          <p className="text-3xl font-bold text-blue-600">{MOCK_SERVICES.length}</p>
-        </div>
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
-          <p className="text-gray-600 text-sm font-medium mb-1">Healthy</p>
-          <p className="text-3xl font-bold text-green-600">
-            {MOCK_SERVICES.filter((s) => s.status === 'healthy').length}
-          </p>
-        </div>
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
-          <p className="text-gray-600 text-sm font-medium mb-1">Degraded</p>
-          <p className="text-3xl font-bold text-yellow-600">
-            {MOCK_SERVICES.filter((s) => s.status === 'degraded').length}
-          </p>
+          <p className="text-3xl font-bold text-blue-600">{MOCK_SERVICES.length - 1}</p>
         </div>
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
           <p className="text-gray-600 text-sm font-medium mb-1">Pods Running</p>
@@ -110,76 +122,84 @@ export const LandingPage = ({ onServiceSelect }: LandingPageProps) => {
         </div>
       </div>
 
-      {/* Services Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {MOCK_SERVICES.map((service) => {
-          const statusColors = getStatusColor(service.status);
-          const podHealth = service.podsRunning === service.podCount;
-
+      {/* Namespaced Collapsible Sections */}
+      <div className="space-y-4">
+        {Object.keys(grouped).map((label) => {
+          const services = grouped[label];
           return (
-            <button
-              key={service.name}
-              onClick={() => onServiceSelect(service.name)}
-              className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-lg hover:border-blue-300 transition-all text-left overflow-hidden cursor-pointer group"
-            >
-              {/* Header */}
-              <div className={`${statusColors.bg} px-6 py-4 border-b border-gray-200`}>
-                <div className="flex items-start justify-between gap-4 mb-2">
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-lg text-gray-900 truncate group-hover:text-blue-600">
-                      {service.name}
-                    </h3>
-                    {service.owner && (
-                      <p className="text-xs text-gray-600 mt-1">👤 {service.owner}</p>
-                    )}
-                  </div>
-                  <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ${statusColors.badge} text-black`}>
-                    <span>{statusColors.icon}</span>
-                    <span className="capitalize">{service.status}</span>
-                  </span>
-                </div>
-              </div>
+            <div key={label} className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+              <button
+                onClick={() => toggleNamespace(label)}
+                className="w-full text-left px-6 py-3 flex items-center justify-between bg-gray-100 hover:bg-gray-200 border-b border-gray-200"
+              >
+                <h3 className="font-semibold text-lg text-gray-900">{label}</h3>
+                <span className="text-sm text-gray-700">{openNamespaces[label] ? '−' : '+'}</span>
+              </button>
 
-              {/* Content */}
-              <div className="p-6 space-y-4">
-                {/* Resources */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-xs text-gray-600 font-medium mb-1">CPU Usage</p>
-                    <p className="text-lg font-bold text-blue-600">{service.cpu}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-600 font-medium mb-1">Memory</p>
-                    <p className="text-lg font-bold text-purple-600">{service.memory}</p>
-                  </div>
-                </div>
+              {openNamespaces[label] && (
+                <div className="p-6">
+                  {services.length === 0 ? (
+                    <p className="text-sm text-gray-500">No services in this namespace</p>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {services.map((service) => {
+                        return (
+                          <div
+                            key={service.name}
+                            role="button"
+                            tabIndex={0}
+                            onClick={() => onServiceSelect(service.name)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') onServiceSelect(service.name);
+                            }}
+                            className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-lg transition-all text-left overflow-hidden cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-300"
+                          >
+                            <div className="px-4 py-3 border-b border-gray-200 bg-white">
+                              <div className="flex items-center justify-between gap-4">
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="font-bold text-md text-gray-900 truncate">{service.name}</h4>
+                                  {service.owner && (
+                                    <p className="text-xs text-gray-600 mt-1">👤 {service.owner}</p>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <a
+                                    href={`https://gitlab.example.com/${service.name}`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="text-xs text-blue-600 hover:opacity-80"
+                                    onClick={(e) => e.stopPropagation()}
+                                    aria-label="Open GitLab"
+                                    title="Open GitLab"
+                                  >
+                                    <img src="/gitlab-logo-500-rgb.svg" alt="GitLab" className="w-16 h-16 hover:scale-110 transition-transform" />
+                                  </a>
+                                  <a
+                                    href={`https://grafana.example.com/dashboard/${service.name}`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="text-xs text-blue-600 hover:opacity-80"
+                                    onClick={(e) => e.stopPropagation()}
+                                    aria-label="Open Grafana"
+                                    title="Open Grafana"
+                                  >
+                                    <img src="/Grafana_logo.svg" alt="Grafana" className="w-8 h-8 hover:scale-110 transition-transform" />
+                                  </a>
+                                </div>
+                              </div>
+                            </div>
 
-                {/* Pod Status */}
-                <div className="pt-2 border-t border-gray-200">
-                  <p className="text-xs text-gray-600 font-medium mb-2">Pod Status</p>
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div
-                          className={`h-2 rounded-full ${podHealth ? 'bg-green-500' : 'bg-yellow-500'}`}
-                          style={{ width: `${(service.podsRunning / service.podCount) * 100}%` }}
-                        />
-                      </div>
+                            <div className="px-4 py-3 bg-gray-50 text-center">
+                              <p className="text-xs font-medium text-blue-600">View Details →</p>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
-                    <span className="ml-3 text-sm font-semibold text-gray-700">
-                      {service.podsRunning}/{service.podCount}
-                    </span>
-                  </div>
+                  )}
                 </div>
-              </div>
-
-              {/* Footer */}
-              <div className="px-6 py-3 bg-gray-50 border-t border-gray-200 text-center">
-                <p className="text-xs font-medium text-blue-600 group-hover:text-blue-700">
-                  View Details →
-                </p>
-              </div>
-            </button>
+              )}
+            </div>
           );
         })}
       </div>
