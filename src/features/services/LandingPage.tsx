@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import CreateServiceModal, { ServiceFormData } from './CreateServiceModal';
 
 interface ServiceQuickView {
   name: string;
@@ -82,9 +83,29 @@ export const LandingPage = ({ onServiceSelect }: LandingPageProps) => {
     Billing: true,
     Consumption: true,
   });
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [services, setServices] = useState<ServiceQuickView[]>(MOCK_SERVICES);
 
   const toggleNamespace = (ns: string) =>
     setOpenNamespaces((s) => ({ ...s, [ns]: !s[ns] }));
+
+  const handleCreateService = (formData: ServiceFormData) => {
+    const newService: ServiceQuickView = {
+      name: formData.name,
+      owner: formData.owner,
+      cpu: formData.cpu,
+      memory: formData.memory,
+      podCount: formData.podCount,
+      podsRunning: formData.podCount,
+      status: 'healthy',
+    };
+
+    setServices([...services, newService]);
+    setIsCreateModalOpen(false);
+
+    // Optionally auto-select the created service
+    onServiceSelect(newService.name);
+  };
 
   // Define the namespaces and how to match services
   const NAMESPACES: { key: string; label: string; matcher: (name: string) => boolean }[] = [
@@ -96,29 +117,30 @@ export const LandingPage = ({ onServiceSelect }: LandingPageProps) => {
   // group services by namespace
   const grouped: Record<string, ServiceQuickView[]> = {};
   NAMESPACES.forEach((ns) => {
-    grouped[ns.label] = MOCK_SERVICES.filter((s) => ns.matcher(s.name));
+    grouped[ns.label] = services.filter((s) => ns.matcher(s.name));
   });
 
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <div className="text-center">
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">Services Overview</h2>
-        <p className="text-gray-600">Quick view of all services and their current status</p>
+      {/* Header with Create Button */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="text-center sm:text-left flex-1">
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">Services Overview</h2>
+          <p className="text-gray-600">Quick view of all services and their current status</p>
+        </div>
+        <button
+          onClick={() => setIsCreateModalOpen(true)}
+          className="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center gap-2 whitespace-nowrap"
+        >
+          <span>+</span> Create Service
+        </button>
       </div>
 
       {/* Stats Summary */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
           <p className="text-gray-600 text-sm font-medium mb-1">Total Services</p>
-          <p className="text-3xl font-bold text-blue-600">{MOCK_SERVICES.length - 1}</p>
-        </div>
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
-          <p className="text-gray-600 text-sm font-medium mb-1">Pods Running</p>
-          <p className="text-3xl font-bold text-purple-600">
-            {MOCK_SERVICES.reduce((sum, s) => sum + s.podsRunning, 0)}/
-            {MOCK_SERVICES.reduce((sum, s) => sum + s.podCount, 0)}
-          </p>
+          <p className="text-3xl font-bold text-blue-600">{services.length -1}</p>
         </div>
       </div>
 
@@ -208,9 +230,16 @@ export const LandingPage = ({ onServiceSelect }: LandingPageProps) => {
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <p className="text-sm text-blue-700">
           <span className="font-semibold">ℹ️ Tip:</span> Click on any service card to view detailed
-          configuration, specifications, and real-time status information.
+          configuration, specifications.
         </p>
       </div>
+
+      {/* Create Service Modal */}
+      <CreateServiceModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onCreateService={handleCreateService}
+      />
     </div>
   );
 };

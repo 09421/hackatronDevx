@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import YamlUploader from '@/components/YamlUploader';
-import ServicesTab from '@/components/ServicesTab';
-import EnvironmentTab from '@/components/EnvironmentTab';
-import SpecTab from '@/components/SpecTab';
-import LandingPage from '@/components/LandingPage';
+import YamlUploader from '@/features/shared/YamlUploader';
+import ServicesTab from '@/features/services/ServicesTab';
+import EnvironmentTab from '@/features/environment/EnvironmentTab';
+import SpecTab from '@/features/spec/SpecTab';
+import LandingPage from '@/features/services/LandingPage';
 import { ParsedYaml, parseYamlContent } from '@/lib/yamlParser';
 
 type TabType = 'services' | 'environment' | 'spec';
@@ -18,8 +18,6 @@ interface TabConfig {
 
 const TABS: TabConfig[] = [
   { id: 'spec', label: 'Specification', icon: '🔧' },
-  { id: 'services', label: 'Services', icon: '🚀' },
-  { id: 'environment', label: 'Environment', icon: '⚙️' },
 ];
 
 export default function Home() {
@@ -170,7 +168,7 @@ export default function Home() {
             <h1 className="text-4xl font-bold mb-1 text-gray-900">
               {selectedService ? selectedService : 'Kamstage'}
             </h1>
-            <p className="text-sm mb-2 text-gray-600">{selectedService ? '' : 'By team B)@man'}</p>
+            <p className="text-sm mb-2 text-gray-600">{selectedService ? '' : 'By team B@man'}</p>
             <div className="flex items-center gap-3">
               <p className="text-gray-600">{selectedService ? 'View detailed configuration and status' : ''}</p>
             </div>
@@ -208,9 +206,9 @@ export default function Home() {
                       >
                         <span className="text-xl mr-2">{tab.icon}</span>
                         {tab.label}
-                        {count > 0 && (
-                          <span className="ml-2 inline-block bg-gray-300 text-gray-800 text-xs font-semibold px-2 py-0.5 rounded-full">{count}</span>
-                        )}
+                        {/* {count > 0 && (
+                          <span className="ml-2 inline-block bg-gray-300 text-gray-800 text-xs font-semibold px-2 py-0.5 rounded-full"></span>
+                        )} */}
                       </button>
                     );
                   })}
@@ -236,7 +234,7 @@ export default function Home() {
                         <img src="/gitlab-logo-500-rgb.svg" alt="GitLab" className="w-18 h-18 hover:scale-110 transition-transform" />
                       </a>
                       <a
-                        href={`https://grafana.prod-services.we01.onkamstrup.com/d/aszxcvasdfzxc/kamstrup-common-general-asp-net-core?orgId=1&from=now-12h&to=now&timezone=browser&var-cluster=kamstrup-eastus-k8s-prod-001&var-namespace=cleaning-and-normalization&var-job=consumption-metric-processor-svc || detailYaml?.metadata?.name}`}
+                        href={`https://grafana.prod-services.we01.onkamstrup.com/d/aszxcvasdfzxc/kamstrup-common-general-asp-net-core?orgId=1&from=now-12h&to=now&timezone=browser&var-cluster=kamstrup-eastus-k8s-prod-001&var-namespace=cleaning-and-normalization&var-job=consumption-metric-processor-svc`}
                         target="_blank"
                         rel="noreferrer"
                         className="text-sm text-blue-600 hover:opacity-80"

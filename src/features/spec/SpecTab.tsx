@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 import YAML from 'js-yaml';
-import EnvironmentSummary from '@/components/EnvironmentSummary';
-import ServiceNetworkDiagram from '@/components/ServiceNetworkDiagram';
+import EnvironmentSummary from '../environment/EnvironmentSummary';
+import ServiceNetworkDiagram from '../services/ServiceNetworkDiagram';
 // Metadata moved to header; no separate metadata panel needed here
 
 interface SpecTabProps {

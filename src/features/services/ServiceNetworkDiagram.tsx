@@ -161,7 +161,7 @@ export const ServiceNetworkDiagram = ({
       case 'search':
         return { fill: '#ec4899', text: '#ffffff', hover: '#db2777' };
       default:
-        return { fill: '#6b7280', text: '#ffffff', hover: '#4b5563' };
+        return { fill: '#000000', text: '#ffffff', hover: '#000000' };
     }
   };
 
