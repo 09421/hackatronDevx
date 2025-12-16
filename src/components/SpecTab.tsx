@@ -11,12 +11,12 @@ interface SpecTabProps {
   metadata?: Record<string, any>;
   onNodeClick?: (id: string, label: string, type: string) => void;
   onSave?: (spec: Record<string, any>) => void;
-  initialView?: 'overview' | 'diagram' | 'raw';
+  initialView?: 'overview' | 'diagram' | 'env' | 'raw';
   onInitialViewConsumed?: () => void;
   specTabForceDiagram?: number;
 }
 
-type ViewMode = 'overview' | 'diagram' | 'raw' | 'env';
+type ViewMode = 'overview' | 'diagram' | 'env' | 'raw';
 
 export const SpecTab = ({ spec = {}, metadata = {}, onNodeClick, onSave, initialView, onInitialViewConsumed, specTabForceDiagram }: SpecTabProps) => {
   const [viewMode, setViewMode] = useState<ViewMode>('overview');
@@ -238,12 +238,12 @@ function EnvVarsViewer({ metadata }: { metadata?: Record<string, any> }) {
   const serviceName = metadata?.name || metadata?.NAME || metadata?.Name || '';
 
   const ENV_FILES = [
-    { key: 'prod-base', file: '/env_prod_base.json', label: 'prod-base' },
-    { key: 'prod-sdc01', file: '/env_prod_sdc01.json', label: 'prod-sdc01' },
-    { key: 'prod-eus01', file: '/env_prod_eus01.json', label: 'prod-eus01' },
-    { key: 'qa-base', file: '/env_qa_base.json', label: 'qa-base' },
-    { key: 'test', file: '/env_test.json', label: 'test' },
-    { key: 'dev', file: '/env_dev.json', label: 'dev' },
+    { key: 'prod-base', file: '/env_prod_base.yaml', label: 'prod-base' },
+    { key: 'prod-sdc01', file: '/env_prod_sdc01.yaml', label: 'prod-sdc01' },
+    { key: 'prod-eus01', file: '/env_prod_eus01.yaml', label: 'prod-eus01' },
+    { key: 'qa-base', file: '/env_qa_base.yaml', label: 'qa-base' },
+    { key: 'test', file: '/env_test.yaml', label: 'test' },
+    { key: 'dev', file: '/env_dev.yaml', label: 'dev' },
   ];
 
   const ENV_CHAIN: Record<string, string[]> = {
@@ -270,8 +270,41 @@ function EnvVarsViewer({ metadata }: { metadata?: Record<string, any> }) {
           try {
             const r = await fetch(ef.file);
             if (!r.ok) return;
-            const j = await r.json();
-            res[ef.key] = j;
+            const txt = await r.text();
+            // Try parsing YAML first
+            try {
+              const j = YAML.load(txt) as any;
+              // If YAML parsed to an object mapping, use it
+              if (j && typeof j === 'object') {
+                res[ef.key] = j;
+                return;
+              }
+            } catch (pe) {
+              // continue to fallback parsing
+            }
+
+            // Fallback: parse simple KEY=VALUE lines where keys are like service__KEY
+            const parsed: Record<string, Record<string, string>> = {};
+            txt.split(/\r?\n/).forEach((line) => {
+              const trimmed = line.trim();
+              if (!trimmed) return;
+              // ignore JSON-like braces (if present)
+              if (trimmed === '{' || trimmed === '}' || trimmed.startsWith('//')) return;
+              const idx = trimmed.indexOf('=');
+              if (idx === -1) return;
+              const left = trimmed.substring(0, idx).trim();
+              const value = trimmed.substring(idx + 1).trim();
+              const parts = left.split('__');
+              if (parts.length < 2) return;
+              const svc = parts[0];
+              const key = parts.slice(1).join('__');
+              if (!parsed[svc]) parsed[svc] = {};
+              parsed[svc][key] = value;
+            });
+            // if we found parsed entries, assign
+            if (Object.keys(parsed).length > 0) {
+              res[ef.key] = parsed;
+            }
           } catch (e) {
             // ignore
           }
@@ -332,7 +365,7 @@ function EnvVarsViewer({ metadata }: { metadata?: Record<string, any> }) {
 
         <div className="ml-auto flex items-center gap-2">
           <button onClick={copyAsEnv} className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700">Copy merged</button>
-          <button onClick={() => setShowJson((s) => !s)} className="px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700">{showJson ? 'Hide JSON' : 'Show JSON'}</button>
+          <button onClick={() => setShowJson((s) => !s)} className="px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700">{showJson ? 'Hide YAML' : 'Show YAML'}</button>
         </div>
       </div>
 
@@ -356,7 +389,7 @@ function EnvVarsViewer({ metadata }: { metadata?: Record<string, any> }) {
         )}
 
         {showJson && (
-          <pre className="mt-4 p-3 bg-gray-900 text-gray-100 rounded text-sm overflow-auto">{JSON.stringify(merged, null, 2)}</pre>
+          <pre className="mt-4 p-3 bg-gray-900 text-gray-100 rounded text-sm overflow-auto">{YAML.dump(merged)}</pre>
         )}
       </div>
     </div>

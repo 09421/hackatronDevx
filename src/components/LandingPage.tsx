@@ -25,7 +25,7 @@ const MOCK_SERVICES: ServiceQuickView[] = [
   },
   {
     name: 'billing-service',
-    owner: 'finance-team',
+    owner: 'waterknights',
     cpu: '180m',
     memory: '384Mi',
     podCount: 1,
@@ -34,7 +34,7 @@ const MOCK_SERVICES: ServiceQuickView[] = [
   },
   {
     name: 'device-description',
-    owner: 'data-engineering',
+    owner: 'spirit',
     cpu: '320m',
     memory: '768Mi',
     podCount: 2,
@@ -43,7 +43,7 @@ const MOCK_SERVICES: ServiceQuickView[] = [
   },
   {
     name: 'flow-service',
-    owner: 'platform-team',
+    owner: 'waterknights',
     cpu: '420m',
     memory: '1Gi',
     podCount: 3,
@@ -52,7 +52,7 @@ const MOCK_SERVICES: ServiceQuickView[] = [
   },
   {
     name: 'analytics-engine',
-    owner: 'analytics-team',
+    owner: 'dragonfly',
     cpu: '150m',
     memory: '256Mi',
     podCount: 1,
@@ -164,7 +164,7 @@ export const LandingPage = ({ onServiceSelect }: LandingPageProps) => {
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <a
-                                    href={`https://gitlab.example.com/${service.name}`}
+                                    href={`https://gitlab.com/kamstrup/hcw/kamstrup-flow/backend/clusterservices/${service.name}`}
                                     target="_blank"
                                     rel="noreferrer"
                                     className="text-xs text-blue-600 hover:opacity-80"
@@ -175,7 +175,7 @@ export const LandingPage = ({ onServiceSelect }: LandingPageProps) => {
                                     <img src="/gitlab-logo-500-rgb.svg" alt="GitLab" className="w-16 h-16 hover:scale-110 transition-transform" />
                                   </a>
                                   <a
-                                    href={`https://grafana.example.com/dashboard/${service.name}`}
+                                    href={`https://grafana.prod-services.we01.onkamstrup.com/d/aszxcvasdfzxc/kamstrup-common-general-asp-net-core?orgId=1&from=now-12h&to=now&timezone=browser&var-cluster=kamstrup-eastus-k8s-prod-001&var-namespace=cleaning-and-normalization&var-job=consumption-metric-processor-svc`}
                                     target="_blank"
                                     rel="noreferrer"
                                     className="text-xs text-blue-600 hover:opacity-80"

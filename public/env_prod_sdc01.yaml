@@ -1,0 +1,10 @@
+
+consumption-metric-processor__DATABASE_HOST=db.sdc01.prod.internal
+consumption-metric-processor__CACHE_URL=redis://cache.sdc01.internal:6379/1
+consumption-metric-processor__LOG_LEVEL=warn
+consumption-metric-processor__CLUSTER_ZONE=sdc01
+consumption-metric-processor__API_ENDPOINT=https://api.sdc01.prod.internal
+
+billing-entity-service__DATABASE_HOST=db.billing.sdc01.internal
+billing-entity-service__LOG_LEVEL=warn
+

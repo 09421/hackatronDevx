@@ -1,7 +1,7 @@
 ---
 metadata:
   name: billing-entity-service
-  owner: finance-team
+  owner: waterknights
 spec:
   deployment_config:
     cluster_targets:

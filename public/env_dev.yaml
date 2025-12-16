@@ -1,0 +1,5 @@
+consumption-metric-processor__DATABASE_HOST=db.dev.internal
+consumption-metric-processor__LOG_LEVEL=debug
+consumption-metric-processor__RETRY_COUNT_HOST=1
+device-description__SEARCH_URL=https://search.dev.internal
+device-description__REDIS_HOST=redis.dev.internal

@@ -1,0 +1,6 @@
+
+consumption-metric-processor__DATABASE_HOST=db.test.internal
+consumption-metric-processor__LOG_LEVEL=info
+
+device-description__REDIS_HOST=redis.test.internal
+

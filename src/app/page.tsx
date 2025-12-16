@@ -167,9 +167,10 @@ export default function Home() {
                 ← Back to Services
               </button>
             )}
-            <h1 className="text-4xl font-bold mb-2 text-gray-900">
+            <h1 className="text-4xl font-bold mb-1 text-gray-900">
               {selectedService ? selectedService : 'Kamstage'}
             </h1>
+            <p className="text-sm mb-2 text-gray-600">{selectedService ? '' : 'By team B)@man'}</p>
             <div className="flex items-center gap-3">
               <p className="text-gray-600">{selectedService ? 'View detailed configuration and status' : ''}</p>
             </div>
@@ -224,7 +225,7 @@ export default function Home() {
                   {(selectedService || detailYaml?.metadata?.name) && (
                     <div className="flex items-center gap-3">
                       <a
-                        href={`https://gitlab.example.com/${selectedService || detailYaml?.metadata?.name}`}
+                        href={`https://gitlab.com/kamstrup/hcw/kamstrup-flow/backend/clusterservices/${selectedService || detailYaml?.metadata?.name}`}
                         target="_blank"
                         rel="noreferrer"
                         className="text-sm text-blue-600 hover:opacity-80"
@@ -235,7 +236,7 @@ export default function Home() {
                         <img src="/gitlab-logo-500-rgb.svg" alt="GitLab" className="w-18 h-18 hover:scale-110 transition-transform" />
                       </a>
                       <a
-                        href={`https://grafana.example.com/dashboard/${selectedService || detailYaml?.metadata?.name}`}
+                        href={`https://grafana.prod-services.we01.onkamstrup.com/d/aszxcvasdfzxc/kamstrup-common-general-asp-net-core?orgId=1&from=now-12h&to=now&timezone=browser&var-cluster=kamstrup-eastus-k8s-prod-001&var-namespace=cleaning-and-normalization&var-job=consumption-metric-processor-svc || detailYaml?.metadata?.name}`}
                         target="_blank"
                         rel="noreferrer"
                         className="text-sm text-blue-600 hover:opacity-80"
